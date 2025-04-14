@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless app to process uploaded files and send notification
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: nodejs22.x
+    MemorySize: 128
+
+Parameters:
+  UploadBucketName:
+    Type: String
+    Description: Name of the S3 bucket where files will be processed
+
+  ProcessedBucketName:
+    Type: String
+    Description: Name of the S3 bucket where files will be processed
+
+  SnsTopicArn:
+    Type: String
+    Description: ARN of an existing SNS Topic
+
+Resources:
+  UploadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "UploadBucketName-${AWS::AccountId}-${AWS::Region}"
+
+  ProcessedBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "processedbkt-${AWS::AccountId}-${AWS::Region}"
+
+  FileProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: FileProcessorFunction
+      CodeUri: src/handlers/
+      Handler: s3-json-logger.handler
+      Runtime: nodejs22.x
+      Architectures:
+        - x86_64
+      Role: !GetAtt FileProcessorRole.Arn
+      Environment:
+        Variables:
+          UPLOAD_BUCKET: !Ref UploadBucket
+          PROCESSED_BUCKET: !Ref ProcessedBucket
+          SNS_TOPIC_ARN: !Ref SnsTopicArn
+
+  FileProcessorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: FileProcessorRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: FileProcessorPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: arn:aws:s3:::*
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref SnsTopicArn
+
+Outputs:
+  UploadBucket:
+    Description: Upload bucket used for file uploads
+    Value: !Ref UploadBucket
+
+  ProcessedBucket:
+    Description: Bucket where processed files are stored
+    Value: !Ref ProcessedBucket
+
+  NotificationTopic:
+    Description: SNS Topic for sending file processed notifications
+    Value: !Ref SnsTopicArn
