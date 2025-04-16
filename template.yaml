@@ -24,13 +24,11 @@ Parameters:
 Resources:
   UploadBucket:
     Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "UploadBucketName-${AWS::AccountId}-${AWS::Region}"
+   
 
   ProcessedBucket:
     Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "processedbkt-${AWS::AccountId}-${AWS::Region}"
+
 
   FileProcessorFunction:
     Type: AWS::Serverless::Function
@@ -51,7 +49,6 @@ Resources:
   FileProcessorRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: FileProcessorRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:

@@ -2,7 +2,7 @@ import pkg from "aws-sdk";
 const { S3 } = pkg;
 import fs from "fs";
 const s3 = new S3();
-const BUCKET_NAME = "file-upload200";
+const BUCKET_NAME = "file-upload-uploadbucket-etru7klxvtct";
 // Create a bucket if it doesn't exist
 const createBucket = (bucketName) => {
   let bucketParams = { Bucket: bucketName };

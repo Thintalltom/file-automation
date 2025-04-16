@@ -9,7 +9,7 @@ import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 const s3 = new S3Client({});
 const sns = new SNSClient({});
 const SNS_ARN = "arn:aws:sns:us-east-1:529088262208:fileprocessedtopic";
-const processed_Bucket = "processedbkt224";
+const processed_Bucket = "file-upload-processedbucket-xzqsnpx69yjv";
 
 
 export const s3JsonLoggerHandler = async (event, context) => {
