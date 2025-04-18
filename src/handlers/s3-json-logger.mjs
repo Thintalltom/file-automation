@@ -6,21 +6,26 @@ import {
 } from "@aws-sdk/client-s3";
 import { sdkStreamMixin } from "@aws-sdk/util-stream-node";
 import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
+
 const s3 = new S3Client({});
 const sns = new SNSClient({});
 const SNS_ARN = "arn:aws:sns:us-east-1:529088262208:fileprocessedtopic";
-const processed_Bucket = "file-upload-processedbucket-xzqsnpx69yjv";
-
+const processed_Bucket = process.env.PROCESSED_BUCKET;
 
 export const s3JsonLoggerHandler = async (event, context) => {
+  let bucket;
+  let key;
+
   try {
     const record = event.Records[0];
-    const bucket = record.s3.bucket.name;
-    const key = decodeURIComponent(record.s3.object.key.replace(/\+/g, " "));
+    bucket = record.s3.bucket.name;
+    key = decodeURIComponent(record.s3.object.key.replace(/\+/g, " "));
+    console.log("📁 Accessing key:", key);
 
     const { Body } = await s3.send(
       new GetObjectCommand({ Bucket: bucket, Key: key })
     );
+
     const stream = sdkStreamMixin(Body);
     const content = await stream.transformToString();
     console.log("📦 File contents:", content);
@@ -38,12 +43,17 @@ export const s3JsonLoggerHandler = async (event, context) => {
     await sns.send(
       new PublishCommand({
         TopicArn: SNS_ARN,
-        Subject: "✅ File Processed",
-        Message: `File "${key}" has been processed and moved to "${PROCESSED_BUCKET}".`,
+        Subject: "File Processed",
+        Message: `File "${key}" has been processed and moved to "${processed_Bucket}".`,
       })
     );
-    console.log("🎉 File processed successfully.");
+
+    console.log(" File processed successfully.");
   } catch (error) {
-    console.error("❌ Error processing file:", error);
+    if (error.name === "NoSuchKey") {
+      console.error(`File not found: s3://${bucket}/${key}`);
+    } else {
+      console.error("Unexpected error:", error);
+    }
   }
 };

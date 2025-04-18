@@ -19,7 +19,7 @@ resolve_s3 = true
 s3_prefix = "file-upload"
 region = "us-east-1"
 disable_rollback = true
-parameter_overrides = "UploadBucketName=\"file-upload200\" ProcessedBucketName=\"processedbkt224\" SnsTopicArn=\"arn:aws:sns:us-east-1:529088262208:fileprocessedtopic\""
+parameter_overrides = "UploadBucketName=\"bkt-src-003\" ProcessedBucketName=\"rpc-bkt-004\" SnsTopicArn=\"arn:aws:sns:us-east-1:529088262208:fileprocessedtopic\""
 image_repositories = []
 
 [default.package.parameters]

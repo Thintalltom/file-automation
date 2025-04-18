@@ -15,7 +15,7 @@ Parameters:
 
   ProcessedBucketName:
     Type: String
-    Description: Name of the S3 bucket where files will be processed
+    Description: Name of the S3 bucket where processed files will be
 
   SnsTopicArn:
     Type: String
@@ -24,18 +24,17 @@ Parameters:
 Resources:
   UploadBucket:
     Type: AWS::S3::Bucket
-   
+
 
   ProcessedBucket:
     Type: AWS::S3::Bucket
-
-
+  
   FileProcessorFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: FileProcessorFunction
       CodeUri: src/handlers/
-      Handler: s3-json-logger.handler
+      Handler: s3-json-logger.s3JsonLoggerHandler
       Runtime: nodejs22.x
       Architectures:
         - x86_64
